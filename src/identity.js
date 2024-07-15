@@ -87,7 +87,9 @@ function identity() {
       supportsWebGL,
       supportsServiceWorkers,
       supportsPushNotifications,
-      time: new Date().getTime()
+      time: new Date().getTime(),
+      url: window.location.href,
+      referrer: document.referrer
     },
     base64() {
       return btoa(JSON.stringify(this.info));
