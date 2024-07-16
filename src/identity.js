@@ -1,4 +1,5 @@
-
+import MD5 from 'crypto-js/md5';
+import Cookies from 'js-cookie'
 /**
  * 使用HTML5的Canvas元素绘制图形并获取图像数据的哈希值，这种方法可以生成较为独特的指纹。
  * @returns 
@@ -25,6 +26,29 @@ function getCanvasFingerprint() {
   return hash;
 }
 
+function getJsVersion() {
+  const features = {
+    'let': (() => { try { eval('let a = 1;'); return true; } catch (e) { return false; } })(),
+    'const': (() => { try { eval('const a = 1;'); return true; } catch (e) { return false; } })(),
+    'arrow functions': typeof (() => { }) === 'function',
+    'class': (() => { try { eval('class A {}'); return true; } catch (e) { return false; } })(),
+    'Promise': typeof Promise !== 'undefined',
+    'Map': typeof Map !== 'undefined',
+    'Set': typeof Set !== 'undefined'
+  };
+
+  let version = 'ES5';
+
+  if (features['let'] && features['const']) {
+    version = 'ES6';
+  }
+  if (features['Promise'] && features['Map'] && features['Set']) {
+    version = 'ES6+';
+  }
+
+  return version;
+}
+
 /**
   * 使用WebGL来渲染图形并获取图像数据的哈希值。
   * @returns 
@@ -39,12 +63,7 @@ function getWebGLFingerprint() {
   const vendor = gl.getParameter(extension.UNMASKED_VENDOR_WEBGL);
   return `${renderer} ${vendor}`;
 }
-
 function identity() {
-
-
-
-
   const userAgent = navigator.userAgent;
   const { width, height } = screen;
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -87,12 +106,24 @@ function identity() {
       supportsWebGL,
       supportsServiceWorkers,
       supportsPushNotifications,
-      time: new Date().getTime(),
+      time: parseInt(new Date().getTime() / 1000),
       url: window.location.href,
-      referrer: document.referrer
+      referrer: document.referrer,
+      jsVersion: getJsVersion()
     },
     base64() {
       return btoa(JSON.stringify(this.info));
+    },
+    getIdentity() {
+      const key = "__ton_u_id_";
+      let v = this.info.supportsWebGL ? localStorage.getItem(key) : Cookies.get(key);
+      if (!v) {
+        const orgStr = `${this.info.getCanvasFingerprint}_${new Date().getTime()}`;
+        console.log(orgStr);
+        v = MD5(orgStr).toString();
+        this.info.supportsWebGL ? localStorage.setItem(key, v) : Cookies.set(key, v);
+      }
+      return v;
     }
   }
 };

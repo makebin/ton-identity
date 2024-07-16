@@ -64,7 +64,16 @@ const distanceToSegment = function (p, v, w) {
   const proj = { x: v.x + tClamped * (w.x - v.x), y: v.y + tClamped * (w.y - v.y) };
   return Math.sqrt(Math.pow(p.x - proj.x, 2) + Math.pow(p.y - proj.y, 2));
 }
-
+const imgProx = function (url) {
+  let img = new Image();
+  img.src = `${url}&uid=${identity().getIdentity()}`;
+  img.onload = function () {
+    img = null;
+  };
+  img.onerror = function () {
+    img = null;
+  };
+}
 function reported(config) {
   this.config = config;
   this.mousePositions = [];
@@ -75,12 +84,11 @@ function reported(config) {
   this.regular = null;
 
   const base64 = identity().base64();
-  const img = new Image();
-  img.src = `${this.config.reportedUrl || ''}&base64=${base64}&active=init`;
-  img.onload = function () { };
-  img.onerror = function () { };
+  imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=init`);
   this.actionListening();
 }
+
+
 
 /**
  * 定时上报机制
@@ -132,10 +140,7 @@ reported.prototype.trackMouseMove = function (event) {
  */
 reported.prototype.send = function () {
   const base64 = this.dataSlice();
-  const img = new Image();
-  img.src = `${this.config.reportedUrl || ''}&base64=${base64}&active=active`;
-  img.onload = function () { };
-  img.onerror = function () { };
+  imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=active`);
   this.startRegular();
 }
 
