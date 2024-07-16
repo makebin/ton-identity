@@ -1,6 +1,6 @@
 import identity from './identity.js';
 const log = console.log;
-
+import MD5 from 'crypto-js/md5';
 
 //过滤和去除鼠标轨迹数据中的噪声点
 const removeNoise = function (positions, threshold = 10) {
@@ -82,13 +82,18 @@ function reported(config) {
    * 定时长时计时器
    */
   this.regular = null;
-
-  const base64 = identity().base64();
-  imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=init`);
+  this.newPage();
+  this.pageIdx = MD5(new Date().getTime() + Math.random()).toString();
   this.actionListening();
+
+
 }
 
-
+reported.prototype.newPage = function () {
+  this.pageIdx = MD5(new Date().getTime() + Math.random()).toString();
+  const base64 = identity().base64();
+  imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=init&pid=${this.pageIdx}`);
+}
 
 /**
  * 定时上报机制
@@ -104,6 +109,25 @@ reported.prototype.startRegular = function () {
 
 
 reported.prototype.actionListening = function () {
+
+  //如果是单页面的应用，
+  if (typeof MutationObserver !== 'undefined') {
+    const cxt = this;
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'href') {
+          // 处理 URL 变化
+          cxt.newPage();
+        }
+      });
+    });
+
+    observer.observe(document.querySelector('head > base') || document.documentElement, {
+      attributes: true,
+      attributeFilter: ['href']
+    });
+  }
+
   log('初始化监听机制');
   document.addEventListener('mousemove', (Event) => {
     this.trackMouseMove(Event);
@@ -140,7 +164,7 @@ reported.prototype.trackMouseMove = function (event) {
  */
 reported.prototype.send = function () {
   const base64 = this.dataSlice();
-  imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=active`);
+  imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=active&pid=${this.pageIdx}`);
   this.startRegular();
 }
 
