@@ -2,6 +2,9 @@ import identity from './identity.js';
 const log = console.log;
 import MD5 from 'crypto-js/md5';
 
+const version = '1.0.0';
+
+
 //过滤和去除鼠标轨迹数据中的噪声点
 const removeNoise = function (positions, threshold = 10) {
   return positions.filter((pos, index, arr) => {
@@ -66,7 +69,7 @@ const distanceToSegment = function (p, v, w) {
 }
 const imgProx = function (url) {
   let img = new Image();
-  img.src = `${url}&uid=${identity().getIdentity()}`;
+  img.src = `${url}&uid=${identity().getIdentity()}&v=${version}`;
   img.onload = function () {
     img = null;
   };
