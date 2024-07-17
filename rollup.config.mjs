@@ -22,6 +22,10 @@ export default {
       exclude: 'node_modules/**', // 只编译我们的源代码
       presets: ['@babel/preset-env'] // 使用 preset-env 将代码转换为 ES5
     }),
-    terser() // 压缩代码
+    terser({
+      compress: {
+        drop_console: true,
+      },
+    }) // 压缩代码
   ]
 };

@@ -1,5 +1,7 @@
 import identity from './identity.js';
-const log = console.log;
+const log = function (...args) {
+  return;
+};
 import MD5 from 'crypto-js/md5';
 
 const version = '1.0.0';
