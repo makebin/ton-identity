@@ -1,5 +1,6 @@
 import MD5 from 'crypto-js/md5';
 import Cookies from 'js-cookie'
+
 /**
  * 使用HTML5的Canvas元素绘制图形并获取图像数据的哈希值，这种方法可以生成较为独特的指纹。
  * @returns 
@@ -70,7 +71,7 @@ function identity() {
   const language = navigator.language || navigator.userLanguage;
   // const getCanvasFingerprint = getCanvasFingerprint();
   // //获取用户的网络连接类型、下行速度等
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
   const {
     effectiveType,
     downlink,
@@ -116,12 +117,12 @@ function identity() {
     },
     getIdentity() {
       const key = "__ton_u_id_";
-      let v = this.info.supportsWebGL ? localStorage.getItem(key) : Cookies.get(key);
+      let v = typeof localStorage !== 'undefined' ? localStorage.getItem(key) : Cookies.get(key);
       if (!v) {
         const orgStr = `${this.info.getCanvasFingerprint}_${new Date().getTime()}`;
         console.log(orgStr);
         v = MD5(orgStr).toString();
-        this.info.supportsWebGL ? localStorage.setItem(key, v) : Cookies.set(key, v);
+        typeof localStorage !== 'undefined' ? localStorage.setItem(key, v) : Cookies.set(key, v);
       }
       return v;
     }

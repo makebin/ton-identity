@@ -67,15 +67,37 @@ const distanceToSegment = function (p, v, w) {
   const proj = { x: v.x + tClamped * (w.x - v.x), y: v.y + tClamped * (w.y - v.y) };
   return Math.sqrt(Math.pow(p.x - proj.x, 2) + Math.pow(p.y - proj.y, 2));
 }
-const imgProx = function (url) {
-  let img = new Image();
-  img.src = `${url}&uid=${identity().getIdentity()}&v=${version}`;
-  img.onload = function () {
-    img = null;
-  };
-  img.onerror = function () {
-    img = null;
-  };
+/**
+ * 
+ * @param {string} url 
+ * @param {Number} delay  一般设置为15000左右可以让img发送完请求
+ */
+const imgProx = function (url, delay = 1) {
+  let i = 0;
+  while (i <= delay) {
+    i++;
+    if (i == 1) {
+      // const src = `${url}&uid=${identity().getIdentity()}&v=${version}`;
+      // const worker = new Worker('https://www.eggjs.org/umi.10724b02.js');
+      // debugger;
+      // // 发送消息给 Web Worker
+      // worker.postMessage({
+      //   src
+      // });
+      setTimeout(() => {
+        let img = new Image();
+        const src = `${url}&uid=${identity().getIdentity()}&v=${version}`;
+        img.src = src;
+        img.onload = function () {
+          img = null;
+        };
+        img.onerror = function () {
+          img = null;
+        };
+      }, 1)
+    }
+  }
+
 }
 function reported(config) {
   this.config = config;
@@ -142,14 +164,15 @@ reported.prototype.actionListening = function () {
     this.trackClick(Event);
   });
   //不一定有用，需要关闭窗口时，发送最后剩余的数据
-  window.addEventListener('unload', (event) => {
+  window.addEventListener('beforeunload', (event) => {
     this.trackClick({
       target: {
         nodeName: "window",
-        type: "beforeunload"
-      }
+      },
+      type: "beforeunload"
     })
-    this.send(-1);
+    this.send(-1, 15000);
+
   });
   this.startRegular();
 }
@@ -175,9 +198,9 @@ reported.prototype.trackMouseMove = function (event) {
 /**
  * 
  */
-reported.prototype.send = function (len = 500) {
+reported.prototype.send = function (len = 500, delay = 1) {
   const base64 = this.dataSlice(len);
-  imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=active&pid=${this.pageIdx}`);
+  imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=active&pid=${this.pageIdx}`, delay);
   this.startRegular();
 }
 
@@ -192,7 +215,7 @@ reported.prototype.formatted = function (val, epsilon = 50) {
   const values = 'function' === typeof this.config.formatted ? this.config.formatted(compressedData) : compressedData;
 
   return {
-    f: Object.keys(values[0] ?? {}),
+    f: Object.keys(values[0] ? values[0] : {}),
     v: values ? values.map(d => {
       return Object.values(d)
     }) : []
