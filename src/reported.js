@@ -141,16 +141,26 @@ reported.prototype.actionListening = function () {
   document.addEventListener('dblclick', (Event) => {
     this.trackClick(Event);
   });
+  //不一定有用，需要关闭窗口时，发送最后剩余的数据
+  window.addEventListener('unload', (event) => {
+    this.trackClick({
+      target: {
+        nodeName: "window",
+        type: "beforeunload"
+      }
+    })
+    this.send(-1);
+  });
   this.startRegular();
 }
 
 
 reported.prototype.trackClick = function (event) {
   this.eventPositions.push({
-    x: event.clientX, y: event.clientY, t: getDeltasTime(), e: {
-      i: event.target.id,
-      n: event.target.nodeName,
-      t: event.type
+    x: event.clientX || 0, y: event.clientY || 0, t: getDeltasTime(), e: {
+      i: event.target.id || '',
+      n: event.target.nodeName || '',
+      t: event.type || ''
     }
   });
 };
@@ -165,8 +175,8 @@ reported.prototype.trackMouseMove = function (event) {
 /**
  * 
  */
-reported.prototype.send = function () {
-  const base64 = this.dataSlice();
+reported.prototype.send = function (len = 500) {
+  const base64 = this.dataSlice(len);
   imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=active&pid=${this.pageIdx}`);
   this.startRegular();
 }
@@ -193,8 +203,8 @@ reported.prototype.formatted = function (val, epsilon = 50) {
  * 对数据进行剪切后指定长度的数据包，去噪，压缩后转换成base64数据进行上报
  * @returns 
  */
-reported.prototype.dataSlice = function () {
-  const mousePositions = this.mousePositions.splice(0, 500);
+reported.prototype.dataSlice = function (leng = 500) {
+  const mousePositions = this.mousePositions.splice(0, leng > 0 ? leng : this.mousePositions.length);
   const compressedData = JSON.stringify(this.formatted(mousePositions));
   log('compressedData=', compressedData);
   const eventPositions = this.eventPositions.splice(0, this.eventPositions.length);
