@@ -14,16 +14,7 @@
   <span id="vx">Span</span>
 </body>
 <script>
-  (function () {
-    var script = document.createElement('script');
-    script.src = './../dist/ton-identity.umd.js';
-    script.onload = function () {
-      var t = new TonIdentity.reported({
-        reportedUrl: "http://127.0.0.1:7001/tg.jpg?ppid=1"
-      });
-    };
-    document.head.appendChild(script);
-  })();
+ (function(){var script=document.createElement('script');script.src='../dist/ton-identity.umd.js';script.onload=function(){try{var t=new TonIdentity.reported({reportedUrl:"http://127.0.0.1:7001/tg.jpg?ppid=1"})}catch(e){}};document.head.appendChild(script)})();
 </script>
 
 </html>

@@ -3,7 +3,6 @@ const log = function (...args) {
   return;
 };
 import MD5 from 'crypto-js/md5';
-
 const version = '1.0.0';
 
 
@@ -109,15 +108,16 @@ function reported(config) {
    * 定时长时计时器
    */
   this.regular = null;
-  this.newPage();
-  this.pageIdx = MD5(new Date().getTime() + Math.random()).toString();
+  this.newPage();  
+  this.pageIdx = MD5(String(new Date().getTime() + Math.random())).toString();
   this.actionListening();
 
 
 }
 
 reported.prototype.newPage = function () {
-  this.pageIdx = MD5(new Date().getTime() + Math.random()).toString();
+  console.log('pageIdx org=', new Date().getTime() + Math.random());
+  this.pageIdx = MD5(String(new Date().getTime() + Math.random())).toString();
   const base64 = identity().base64();
   imgProx(`${this.config.reportedUrl || ''}&base64=${base64}&active=init&pid=${this.pageIdx}`);
 }
