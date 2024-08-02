@@ -180,7 +180,7 @@ reported.prototype.actionListening = function () {
       },
       type: "beforeunload"
     })
-    this.send(-1, 15000);
+    this.send(-1, 20e3);
 
   });
   this.startRegular();
@@ -225,7 +225,7 @@ reported.prototype.customizeSend = function (config = {}) {
     console.log(this.eventPositions);
   }
   try {
-    this.send();
+    this.send(-1);
   } catch (e) {
     console.log(e);
   }
