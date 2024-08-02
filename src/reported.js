@@ -74,30 +74,37 @@ const distanceToSegment = function (p, v, w) {
  * @param {Number} delay  一般设置为15000左右可以让img发送完请求
  */
 const imgProx = function (url, delay = 1) {
-  let i = 0;
-  while (i <= delay) {
-    i++;
-    if (i == 1) {
-      // const src = `${url}&uid=${identity().getIdentity()}&v=${version}`;
-      // const worker = new Worker('https://www.eggjs.org/umi.10724b02.js');
-      // debugger;
-      // // 发送消息给 Web Worker
-      // worker.postMessage({
-      //   src
-      // });
-      setTimeout(() => {
-        let img = new Image();
-        const src = `${url}&uid=${identity().getIdentity()}&v=${version}`;
-        img.src = src;
-        img.onload = function () {
-          img = null;
-        };
-        img.onerror = function () {
-          img = null;
-        };
-      }, 1)
-    }
-  }
+  let img = new Image();
+  const src = `${url}&uid=${encodeURIComponent(identity().getIdentity())}&v=${encodeURIComponent(version)}`;
+  img.src = src;
+  console.log('加载网址', src);
+
+  img.onload = function () {
+    // 图片加载成功的处理逻辑
+  };
+
+  img.onerror = function (e) {
+    console.error(e); // 打印错误信息
+  };
+
+  img.onloadend = img.onerror = function () {
+    console.log('清理img对象...');
+    img = null; // 无论加载成功还是失败，都将 img 对象设置为 null 以释放内存。
+  };
+
+  // while (i <= delay) {
+  //   i++;
+  //   if (i == 1) {
+  //     // const src = `${url}&uid=${identity().getIdentity()}&v=${version}`;
+  //     // const worker = new Worker('https://www.eggjs.org/umi.10724b02.js');
+  //     // debugger;
+  //     // // 发送消息给 Web Worker
+  //     // worker.postMessage({
+  //     //   src
+  //     // });
+
+  //   }
+  // }
 
 }
 function reported(config) {
@@ -108,7 +115,7 @@ function reported(config) {
    * 定时长时计时器
    */
   this.regular = null;
-  this.newPage();  
+  this.newPage();
   this.pageIdx = MD5(String(new Date().getTime() + Math.random())).toString();
   this.actionListening();
 
@@ -197,6 +204,34 @@ reported.prototype.trackMouseMove = function (event) {
   this.mousePositions.push({ x: event.clientX, y: event.clientY, t: getDeltasTime() });
 };
 
+
+/**
+ * 手动触发发送事件
+ */
+reported.prototype.customizeSend = function (config = {}) {
+  if (typeof config.onBefore === 'function') {
+    try {
+      const values = config.onBefore();
+      if (values) {
+        if (Array.isArray(values)) {
+          this.eventPositions.push(...values);
+        } else {
+          this.eventPositions.push(values);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    console.log(this.eventPositions);
+  }
+  try {
+    this.send();
+  } catch (e) {
+    console.log(e);
+  }
+  typeof config.onAfter === 'function' && config.onAfter();
+};
+
 /**
  * 
  */
@@ -235,6 +270,7 @@ reported.prototype.dataSlice = function (leng = 500) {
   const eventPositions = this.eventPositions.splice(0, this.eventPositions.length);
   const eventCompressedData = JSON.stringify(this.formatted(eventPositions), 15);
   log('eventCompressedData=', eventCompressedData);
+  console.log(eventCompressedData, eventCompressedData);
   return btoa(JSON.stringify({
     m: compressedData,
     a: eventCompressedData

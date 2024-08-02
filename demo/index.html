@@ -12,9 +12,34 @@
   <button id="pox" type="submit">Click</button>
   <a href="#" id="pand">熊猫</a>
   <span id="vx">Span</span>
+  <button id="px1" type="button">123123</button>
 </body>
 <script>
- (function(){var script=document.createElement('script');script.src='../dist/ton-identity.umd.js';script.onload=function(){try{var t=new TonIdentity.reported({reportedUrl:"http://127.0.0.1:7001/tg.jpg?ppid=1"})}catch(e){}};document.head.appendChild(script)})();
+  (function () { var script = document.createElement('script'); script.src = '../dist/ton-identity.umd.js'; script.onload = function () { try { window._jjhtg = new TonIdentity.reported({ reportedUrl: "http://127.0.0.1:7001/tg.jpg?ppid=1" }) } catch (e) { } }; document.head.appendChild(script) })();
+</script>
+<script>
+  document.getElementById('px1').addEventListener('click', function (e) {
+    const onAfter = () => {
+      console.log("执行下载", e);
+    }
+    try {
+      _jjhtg && !!_jjhtg.customizeSend && _jjhtg.customizeSend({
+        "onBefore": function () {
+          const event = { target: { "nodeName": "1231231.apk", id: "a" }, type: "download" };
+          return {
+            x: event.clientX || 0, y: event.clientY || 0, t: 0, e: {
+              i: event.target.id || '',
+              n: event.target.nodeName || '',
+              t: event.type || ''
+            }
+          }
+        }, "onAfter": onAfter
+      }
+      )
+    } catch (e) {
+      onAfter();
+    }
+  });
 </script>
 
 </html>
